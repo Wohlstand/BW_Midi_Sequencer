@@ -1681,6 +1681,9 @@ void BW_MidiSequencer::handleEvent(size_t track, const BW_MidiSequencer::MidiEve
         uint64_t length = static_cast<uint64_t>(evt.data.size());
         const char *data(length ? reinterpret_cast<const char *>(evt.data.data()) : "");
 
+        if(m_interface->rt_metaEvent) // Meta event hook
+            m_interface->rt_metaEvent(m_interface->rtUserData, evtype, reinterpret_cast<const uint8_t*>(data), size_t(length));
+
         if(evtype == MidiEvent::ST_ENDTRACK) // End Of Track
         {
             status = -1;

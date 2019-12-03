@@ -132,6 +132,11 @@ typedef struct BW_MidiRtInterface
      * Optional events *
      *******************/
 
+    /*! Meta event hook */
+    typedef void (*MetaEventHook)(void *userdata, uint8_t type, const uint8_t *data, size_t len);
+    /*! Meta event hook which catches all meta events */
+    MetaEventHook       rt_metaEvent;
+
     /*! Device Switch MIDI event */
     typedef void (*RtDeviceSwitch)(void *userdata, size_t track, const char *data, size_t length);
     /*! Device Switch MIDI event hook */
