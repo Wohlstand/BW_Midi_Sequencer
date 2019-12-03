@@ -108,9 +108,9 @@ typedef struct BW_MidiRtInterface
     RtChannelAfterTouch rt_channelAfterTouch;
 
     /*! Controller change MIDI event */
-    typedef void (*RtControlerChange)(void *userdata, uint8_t channel, uint8_t type, uint8_t value);
+    typedef void (*RtControllerChange)(void *userdata, uint8_t channel, uint8_t type, uint8_t value);
     /*! Controller change MIDI event hook */
-    RtControlerChange   rt_controllerChange;
+    RtControllerChange   rt_controllerChange;
 
     /*! Patch change MIDI event */
     typedef void (*RtPatchChange)(void *userdata, uint8_t channel, uint8_t patch);
