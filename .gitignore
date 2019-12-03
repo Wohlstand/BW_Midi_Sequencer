@@ -1,0 +1,86 @@
+# C++ objects and libs
+
+*.slo
+*.lo
+*.o
+*.a
+*.la
+*.lai
+*.so
+*.dll
+*.dylib
+build
+
+#Mac OS's junk
+.DS_Store
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+*.xcworkspace
+!default.xcworkspace
+xcuserdata
+profile
+*.moved-aside
+DerivedData
+# Pods - for those of you who use CocoaPods
+Pods
+# Don't deploy automatically generated pge_deps's qmake project!
+pge_deps.xcodeproj
+
+# User settings for IDEs
+.idea/
+.vscode/
+.vs/
+
+# CMake
+CMakeCache.txt
+CMakeFiles
+
+# Visual Studio 2017'th
+CMakeSettings.json
+
+# Qt-es
+
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qbs.user.*
+*.txt.user
+*.txt.user.*
+*.error
+moc_*.cpp
+ui_*.h
+qrc_*.cpp
+Makefile
+Makefile.*
+*/Makefile.*
+*-build-*
+*build-*
+.qmake.stash
+
+#git related
+
++*.swp
+*.db
+
+#unpacked libraries sources
+/_Libs/_sources/_build_cache*/*
+!/_Libs/_sources
+
+#Temp files of LibreOffice
+.~lock.*
+
+#Paths config files in the root
+/_paths.bat
+/_paths.sh
+
+#Notepad++ Backup files
+*.bak
+
+*.directory
+
