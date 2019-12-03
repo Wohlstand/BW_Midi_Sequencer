@@ -329,7 +329,7 @@ void BW_MidiSequencer::setInterface(const BW_MidiRtInterface *intrf)
     // Note ON hook is REQUIRED
     assert(intrf->rt_noteOn);
     // Note OFF hook is REQUIRED
-    assert(intrf->rt_noteOff);
+    assert(intrf->rt_noteOff || intrf->rt_noteOffVel);
     // Note Aftertouch hook is REQUIRED
     assert(intrf->rt_noteAfterTouch);
     // Channel Aftertouch hook is REQUIRED
@@ -1788,7 +1788,11 @@ void BW_MidiSequencer::handleEvent(size_t track, const BW_MidiSequencer::MidiEve
     case MidiEvent::T_NOTEOFF: // Note off
     {
         uint8_t note = evt.data[0];
-        m_interface->rt_noteOff(m_interface->rtUserData, static_cast<uint8_t>(midCh), note);
+        uint8_t vol = evt.data[1];
+        if(m_interface->rt_noteOff)
+            m_interface->rt_noteOff(m_interface->rtUserData, static_cast<uint8_t>(midCh), note);
+        if(m_interface->rt_noteOffVel)
+            m_interface->rt_noteOffVel(m_interface->rtUserData, static_cast<uint8_t>(midCh), note, vol);
         break;
     }
 

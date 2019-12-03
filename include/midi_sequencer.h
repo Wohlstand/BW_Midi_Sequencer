@@ -97,6 +97,11 @@ typedef struct BW_MidiRtInterface
     /*! Note-Off MIDI event hook */
     RtNoteOff           rt_noteOff;
 
+    /*! Note-Off MIDI event with a velocity */
+    typedef void (*RtNoteOffVel)(void *userdata, uint8_t channel, uint8_t note, uint8_t velocity);
+    /*! Note-Off MIDI event hook with a velocity */
+    RtNoteOffVel        rt_noteOffVel;
+
     /*! Note aftertouch MIDI event */
     typedef void (*RtNoteAfterTouch)(void *userdata, uint8_t channel, uint8_t note, uint8_t atVal);
     /*! Note aftertouch MIDI event hook */
