@@ -1,7 +1,7 @@
 /*
  * BW_Midi_Sequencer - MIDI Sequencer for C++
  *
- * Copyright (c) 2015-2019 Vitaly Novichkov <admin@wohlnet.ru>
+ * Copyright (c) 2015-2020 Vitaly Novichkov <admin@wohlnet.ru>
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the "Software"),
@@ -78,6 +78,12 @@ typedef struct BW_MidiRtInterface
     LoopEndHook   onloopEnd;
     /*! User data which will be passed through On-LoopStart hook */
     void         *onloopEnd_userData;
+
+    typedef void (*SongStartHook)(void *userdata);
+    /*! Song start hook which is calling when starting playing song at begin */
+    SongStartHook onSongStart;
+    /*! User data which will be passed through On-SongStart hook */
+    void         *onSongStart_userData;
 
     /*! MIDI Run Time event calls user data */
     void *rtUserData;

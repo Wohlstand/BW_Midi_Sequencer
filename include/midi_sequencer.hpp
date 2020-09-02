@@ -1,7 +1,7 @@
 /*
  * BW_Midi_Sequencer - MIDI Sequencer for C++
  *
- * Copyright (c) 2015-2019 Vitaly Novichkov <admin@wohlnet.ru>
+ * Copyright (c) 2015-2020 Vitaly Novichkov <admin@wohlnet.ru>
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the "Software"),
@@ -132,18 +132,21 @@ class BW_MidiSequencer
             //! [Non-Standard] Loop End point with support of multi-loops
             ST_LOOPSTACK_BREAK = 0xE6,//size == 0 <CUSTOM>
             //! [Non-Standard] Callback Trigger
-            ST_CALLBACK_TRIGGER = 0xE7//size == 1 <CUSTOM>
+            ST_CALLBACK_TRIGGER = 0xE7,//size == 1 <CUSTOM>
+
+            // Built-in hooks
+            ST_SONG_BEGIN_HOOK    = 0x101
         };
         //! Main type of event
-        uint8_t type;
+        uint_fast16_t type;
         //! Sub-type of the event
-        uint8_t subtype;
+        uint_fast16_t subtype;
         //! Targeted MIDI channel
-        uint8_t channel;
+        uint_fast16_t channel;
         //! Is valid event
-        uint8_t isValid;
+        uint_fast16_t isValid;
         //! Reserved 5 bytes padding
-        uint8_t __padding[4];
+        uint_fast16_t __padding[4];
         //! Absolute tick position (Used for the tempo calculation only)
         uint64_t absPosition;
         //! Raw data of this event
