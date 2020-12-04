@@ -11,8 +11,8 @@ target_include_directories(w32playmidi PRIVATE
     ${w32MidiPlay_SOURCE_DIR}/../../include
 )
 
-target_link_libraries(fplay PRIVATE -lwinmm)
+target_link_libraries(w32playmidi PRIVATE -lwinmm)
 if(NOT MSVC)
-    target_link_libraries(fplay PRIVATE -lstdc++)
+    target_link_libraries(w32playmidi PRIVATE -lstdc++)
 endif()
 
