@@ -21,7 +21,7 @@ int main(int argc, char **argv)
     liDueTime.QuadPart = -10000000LL;
 
     // Create an unnamed waitable timer.
-    hTimer = CreateWaitableTimer(NULL, TRUE, NULL);
+    hTimer = CreateWaitableTimerW(NULL, TRUE, NULL);
     if (NULL == hTimer)
     {
         fprintf(stderr, "CreateWaitableTimer failed (%lu)\n", (unsigned long)GetLastError());
@@ -64,6 +64,8 @@ int main(int argc, char **argv)
 
     mixer_seq_close_midi_out(q);
     mixer_seq_free(q);
+
+    CloseHandle(hTimer);
 
     return 0;
 }
