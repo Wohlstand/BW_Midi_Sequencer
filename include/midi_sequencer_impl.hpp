@@ -1,7 +1,7 @@
 /*
  * BW_Midi_Sequencer - MIDI Sequencer for C++
  *
- * Copyright (c) 2015-2020 Vitaly Novichkov <admin@wohlnet.ru>
+ * Copyright (c) 2015-2021 Vitaly Novichkov <admin@wohlnet.ru>
  *
  * Permission is hereby granted, free of charge, to any person obtaining
  * a copy of this software and associated documentation files (the "Software"),
@@ -31,6 +31,10 @@
 #include <algorithm> // std::copy
 #include <set>
 #include <assert.h>
+
+#if defined(VITA)
+#include <psp2kern/kernel/sysclib.h> // snprintf
+#endif
 
 #if defined(_WIN32) && !defined(__WATCOMC__)
 #   ifdef _MSC_VER
