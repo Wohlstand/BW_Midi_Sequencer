@@ -384,6 +384,9 @@ private:
     //! Is song at end
     bool    m_atEnd;
 
+    //! Set the number of loops limit. Lesser than 0 - loop infinite
+    int     m_loopCount;
+
     /**
      * @brief Loop stack entry
      */
@@ -427,6 +430,15 @@ private:
         //! Are loop points invalid?
         bool    invalidLoop; /*Loop points are invalid (loopStart after loopEnd or loopStart and loopEnd are on same place)*/
 
+        //! Is look got temporarily broken because of post-end seek?
+        bool    temporaryBroken;
+
+        //! How much times the loop should start repeat? For example, if you want to loop song twice, set value 1
+        int     loopsCount;
+
+        //! how many loops left until finish the song
+        int     loopsLeft;
+
         //! Stack of nested loops
         std::vector<LoopStackEntry> stack;
         //! Current level on the loop stack (<0 - out of loop, 0++ - the index in the loop stack)
@@ -443,12 +455,15 @@ private:
             caughtStackEnd = false;
             caughtStackBreak = false;
             skipStackStart = false;
+            loopsLeft = loopsCount;
         }
 
         void fullReset()
         {
+            loopsCount = -1;
             reset();
             invalidLoop = false;
+            temporaryBroken = false;
             stack.clear();
             stackLevel = -1;
         }
@@ -616,6 +631,18 @@ public:
      * @param enabled Enable loop
      */
     void setLoopEnabled(bool enabled);
+
+    /**
+     * @brief Get the number of loops set
+     * @return number of loops or -1 if loop infinite
+     */
+    int getLoopsCount();
+
+    /**
+     * @brief How many times song should loop
+     * @param loops count or -1 to loop infinite
+     */
+    void setLoopsCount(int loops);
 
     /**
      * @brief Switch loop hooks-only mode on/off

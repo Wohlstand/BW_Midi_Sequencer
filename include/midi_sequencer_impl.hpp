@@ -314,6 +314,7 @@ BW_MidiSequencer::BW_MidiSequencer() :
     m_loopEndTime(-1.0),
     m_tempoMultiplier(1.0),
     m_atEnd(false),
+    m_loopCount(-1),
     m_trackSolo(~static_cast<size_t>(0)),
     m_triggerHandler(NULL),
     m_triggerUserData(NULL)
@@ -446,6 +447,18 @@ bool BW_MidiSequencer::getLoopEnabled()
 void BW_MidiSequencer::setLoopEnabled(bool enabled)
 {
     m_loopEnabled = enabled;
+}
+
+int BW_MidiSequencer::getLoopsCount()
+{
+    return m_loopCount >= 0 ? (m_loopCount + 1) : m_loopCount;
+}
+
+void BW_MidiSequencer::setLoopsCount(int loops)
+{
+    if(loops >= 1)
+        loops -= 1; // Internally, loops count has the 0 base
+    m_loopCount = loops;
 }
 
 void BW_MidiSequencer::setLoopHooksOnly(bool enabled)
@@ -903,6 +916,85 @@ void BW_MidiSequencer::buildTimeLine(const std::vector<MidiEvent> &tempos,
     // Set lowest level of the loop stack
     m_loop.stackLevel = -1;
 
+    // Set the count of loops
+    m_loop.loopsCount = m_loopCount;
+    m_loop.loopsLeft = m_loopCount;
+
+    /********************************************************************************/
+    // Find and set proper loop points
+    /********************************************************************************/
+    if(!m_loop.invalidLoop && !m_currentPosition.track.empty())
+    {
+        unsigned caughLoopStart = 0;
+        bool scanDone = false;
+        const size_t  trackCount = m_currentPosition.track.size();
+        Position      rowPosition(m_currentPosition);
+
+        while(!scanDone)
+        {
+            const Position      rowBeginPosition(rowPosition);
+
+            for(size_t tk = 0; tk < trackCount; ++tk)
+            {
+                Position::TrackInfo &track = rowPosition.track[tk];
+                if((track.lastHandledEvent >= 0) && (track.delay <= 0))
+                {
+                    // Check is an end of track has been reached
+                    if(track.pos == m_trackData[tk].end())
+                    {
+                        track.lastHandledEvent = -1;
+                        continue;
+                    }
+
+                    for(size_t i = 0; i < track.pos->events.size(); i++)
+                    {
+                        const MidiEvent &evt = track.pos->events[i];
+                        if(evt.type == MidiEvent::T_SPECIAL && evt.subtype == MidiEvent::ST_LOOPSTART)
+                        {
+                            caughLoopStart++;
+                            scanDone = true;
+                            break;
+                        }
+                    }
+
+                    if(track.lastHandledEvent >= 0)
+                    {
+                        track.delay += track.pos->delay;
+                        track.pos++;
+                    }
+                }
+            }
+
+            // Find a shortest delay from all track
+            uint64_t shortestDelay = 0;
+            bool     shortestDelayNotFound = true;
+
+            for(size_t tk = 0; tk < trackCount; ++tk)
+            {
+                Position::TrackInfo &track = rowPosition.track[tk];
+                if((track.lastHandledEvent >= 0) && (shortestDelayNotFound || track.delay < shortestDelay))
+                {
+                    shortestDelay = track.delay;
+                    shortestDelayNotFound = false;
+                }
+            }
+
+            // Schedule the next playevent to be processed after that delay
+            for(size_t tk = 0; tk < trackCount; ++tk)
+                rowPosition.track[tk].delay -= shortestDelay;
+
+            if(caughLoopStart > 0)
+            {
+                m_loopBeginPosition = rowBeginPosition;
+                m_loopBeginPosition.absTimePosition = m_loopStartTime;
+                scanDone = true;
+            }
+
+            if(shortestDelayNotFound)
+                break;
+        }
+    }
+
     /********************************************************************************/
     // Resolve "hell of all times" of too short drum notes:
     // move too short percussion note-offs far far away as possible
@@ -1154,7 +1246,7 @@ bool BW_MidiSequencer::processEvents(bool isSeek)
 #endif
         m_currentPosition.wait += t.value();
 
-    if(caughLoopStart > 0)
+    if(caughLoopStart > 0 && m_loopBeginPosition.absTimePosition <= 0.0)
         m_loopBeginPosition = rowBeginPosition;
 
     if(caughLoopStackStart > 0)
@@ -1238,13 +1330,24 @@ bool BW_MidiSequencer::processEvents(bool isSeek)
         m_loop.caughtEnd         = false;
         shortestDelay = 0;
 
-        if(!m_loopEnabled || m_loopHooksOnly)
+        if(!m_loopEnabled || (shortestDelayNotFound && m_loop.loopsCount >= 0 && m_loop.loopsLeft < 1) || m_loopHooksOnly)
         {
             m_atEnd = true; // Don't handle events anymore
             m_currentPosition.wait += m_postSongWaitDelay; // One second delay until stop playing
             return true; // We have caugh end here!
         }
-        m_currentPosition = m_loopBeginPosition;
+
+        if(m_loop.temporaryBroken)
+        {
+            m_currentPosition = m_trackBeginPosition;
+            m_loop.temporaryBroken = false;
+        }
+        else if(m_loop.loopsCount < 0 || m_loop.loopsLeft >= 1)
+        {
+            m_currentPosition = m_loopBeginPosition;
+            if(m_loop.loopsCount >= 1)
+                m_loop.loopsLeft--;
+        }
     }
 
     return true; // Has events in queue
@@ -1897,7 +2000,7 @@ double BW_MidiSequencer::seek(double seconds, const double granularity)
     /* Attempt to go away out of song end must rewind position to begin */
     if(seconds > m_fullSongTimeLength)
     {
-        rewind();
+        this->rewind();
         return 0.0;
     }
 
@@ -1912,7 +2015,7 @@ double BW_MidiSequencer::seek(double seconds, const double granularity)
      * - All sustaining notes must be killed
      * - Ignore Note-On events
      */
-    rewind();
+    this->rewind();
 
     /*
      * Set "loop Start" to false to prevent overwrite of loopStart position with
@@ -1921,6 +2024,8 @@ double BW_MidiSequencer::seek(double seconds, const double granularity)
      * TODO: Detect & set loopStart position on load time to don't break loop while seeking
      */
     m_loop.caughtStart   = false;
+
+    m_loop.temporaryBroken = (seconds >= m_loopEndTime);
 
     while((m_currentPosition.absTimePosition < seconds) &&
           (m_currentPosition.absTimePosition < m_fullSongTimeLength))
@@ -1950,6 +2055,13 @@ double BW_MidiSequencer::seek(double seconds, const double granularity)
 
     if(m_currentPosition.wait < 0.0)
         m_currentPosition.wait = 0.0;
+
+    if(m_atEnd)
+    {
+        this->rewind();
+        m_loopEnabled = loopFlagState;
+        return 0.0;
+    }
 
     m_time.reset();
     m_time.delay = m_currentPosition.wait;
@@ -1983,8 +2095,10 @@ void BW_MidiSequencer::rewind()
     m_currentPosition   = m_trackBeginPosition;
     m_atEnd             = false;
 
+    m_loop.loopsCount = m_loopCount;
     m_loop.reset();
     m_loop.caughtStart  = true;
+    m_loop.temporaryBroken = false;
     m_time.reset();
 }
 
