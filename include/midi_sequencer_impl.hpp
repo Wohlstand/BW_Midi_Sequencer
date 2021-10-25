@@ -418,6 +418,33 @@ bool BW_MidiSequencer::setTrackEnabled(size_t track, bool enable)
     return true;
 }
 
+bool BW_MidiSequencer::setChannelEnabled(size_t channel, bool enable)
+{
+    if(channel >= 16)
+        return false;
+
+    if(!enable && m_channelDisable[channel] != !enable)
+    {
+        uint8_t ch = static_cast<uint8_t>(channel);
+
+        // Releae all pedals
+        m_interface->rt_controllerChange(m_interface->rtUserData, ch, 64, 0);
+        m_interface->rt_controllerChange(m_interface->rtUserData, ch, 66, 0);
+
+        // Release all notes on the channel now
+        for(int i = 0; i < 127; ++i)
+        {
+            if(m_interface->rt_noteOff)
+                m_interface->rt_noteOff(m_interface->rtUserData, ch, i);
+            if(m_interface->rt_noteOffVel)
+                m_interface->rt_noteOffVel(m_interface->rtUserData, ch, i, 0);
+        }
+    }
+
+    m_channelDisable[channel] = !enable;
+    return true;
+}
+
 void BW_MidiSequencer::setSoloTrack(size_t track)
 {
     m_trackSolo = track;
@@ -504,6 +531,7 @@ void BW_MidiSequencer::buildSmfSetupReset(size_t trackCount)
     m_loopEndTime = -1.0;
     m_loopFormat = Loop_Default;
     m_trackDisable.clear();
+    std::memset(m_channelDisable, 0, sizeof(m_channelDisable));
     m_trackSolo = ~(size_t)0;
     m_musTitle.clear();
     m_musCopyright.clear();
@@ -1900,6 +1928,8 @@ void BW_MidiSequencer::handleEvent(size_t track, const BW_MidiSequencer::MidiEve
     {
     case MidiEvent::T_NOTEOFF: // Note off
     {
+        if(midCh < 16 && m_channelDisable[midCh])
+            break; // Disabled channel
         uint8_t note = evt.data[0];
         uint8_t vol = evt.data[1];
         if(m_interface->rt_noteOff)
@@ -1911,6 +1941,8 @@ void BW_MidiSequencer::handleEvent(size_t track, const BW_MidiSequencer::MidiEve
 
     case MidiEvent::T_NOTEON: // Note on
     {
+        if(midCh < 16 && m_channelDisable[midCh])
+            break; // Disabled channel
         uint8_t note = evt.data[0];
         uint8_t vol  = evt.data[1];
         m_interface->rt_noteOn(m_interface->rtUserData, static_cast<uint8_t>(midCh), note, vol);

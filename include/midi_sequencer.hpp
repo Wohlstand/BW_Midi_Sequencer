@@ -510,6 +510,8 @@ private:
     std::vector<bool> m_trackDisable;
     //! Index of solo track, or max for disabled
     size_t m_trackSolo;
+    //! MIDI channel disable (exception for extra port-prefix-based channels)
+    bool m_channelDisable[16];
 
     /**
      * @brief Handler of callback trigger events
@@ -594,6 +596,14 @@ public:
      * @return true on success, false if there was no such track
      */
     bool setTrackEnabled(size_t track, bool enable);
+
+    /**
+     * @brief Disable/enable a channel is sounding
+     * @param channel Channel number from 0 to 15
+     * @param enable Enable the channel playback
+     * @return true on success, false if there was no such channel
+     */
+    bool setChannelEnabled(size_t channel, bool enable);
 
     /**
      * @brief Enables or disables solo on a track
