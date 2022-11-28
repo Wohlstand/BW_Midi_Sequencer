@@ -2250,10 +2250,13 @@ static bool detectRSXX(const char *head, FileAndMemReader &fr)
     bool ret = false;
 
     // Try to identify RSXX format
-    fr.seek(head[0] - 0x10, FileAndMemReader::SET);
-    fr.read(headerBuf, 1, 6);
-    if(std::memcmp(headerBuf, "rsxx}u", 6) == 0)
-            ret = true;
+    if (head[0] >= 0x5D)
+    {
+        fr.seek(head[0] - 0x10, FileAndMemReader::SET);
+        fr.read(headerBuf, 1, 6);
+        if(std::memcmp(headerBuf, "rsxx}u", 6) == 0)
+                ret = true;
+    }
 
     fr.seek(0, FileAndMemReader::SET);
     return ret;
@@ -2494,19 +2497,27 @@ bool BW_MidiSequencer::parseRSXX(FileAndMemReader &fr)
 
     // Try to identify RSXX format
     char start = headerBuf[0];
-    fr.seek(start - 0x10, FileAndMemReader::SET);
-    fr.read(headerBuf, 1, 6);
-    if(std::memcmp(headerBuf, "rsxx}u", 6) == 0)
+    if (start < 0x5D)
     {
-        m_format = Format_RSXX;
-        fr.seek(start, FileAndMemReader::SET);
-        trackCount = 1;
-        deltaTicks = 60;
+        m_errorString = "RSXX song too short!\n";
+        return false;
     }
     else
     {
-        m_errorString = "Invalid RSXX header!\n";
-        return false;
+        fr.seek(start - 0x10, FileAndMemReader::SET);
+        fr.read(headerBuf, 1, 6);
+        if(std::memcmp(headerBuf, "rsxx}u", 6) == 0)
+        {
+            m_format = Format_RSXX;
+            fr.seek(start, FileAndMemReader::SET);
+            trackCount = 1;
+            deltaTicks = 60;
+        }
+        else
+        {
+            m_errorString = "Invalid RSXX header!\n";
+            return false;
+        }
     }
 
     rawTrackData.clear();
