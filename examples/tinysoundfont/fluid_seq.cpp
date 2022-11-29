@@ -124,10 +124,10 @@ void FluidMidiSeq::initSequencerInterface()
     m_sequencer->setInterface(seq);
 }
 
-void FluidMidiSeq::initFluid()
+void FluidMidiSeq::initFluid(const char *bankPath)
 {
     closeFluid();
-    synth = tsf_load_filename("/usr/share/sounds/sf2/FluidR3_GM.sf2");
+    synth = tsf_load_filename(bankPath);
 //    synth = tsf_load_filename("/home/wohlstand/Yandex.Disk/Timidity-SNES/timidity/SNES.sf2");
     for(int ch = 0; ch < 16; ch++)
         tsf_channel_set_bank(synth, ch, 0);
@@ -144,7 +144,7 @@ void FluidMidiSeq::closeFluid()
     }
 }
 
-FluidMidiSeq::FluidMidiSeq(uint32_t rate)
+FluidMidiSeq::FluidMidiSeq(const char *bankPath, uint32_t rate)
 {
     synth = nullptr;
 
@@ -152,7 +152,7 @@ FluidMidiSeq::FluidMidiSeq(uint32_t rate)
     m_sequencerInterface = nullptr;
     m_rate = rate;
 
-    initFluid();
+    initFluid(bankPath);
     initSequencerInterface();
 }
 

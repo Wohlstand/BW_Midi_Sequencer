@@ -25,17 +25,28 @@ void my_audio_callback(void *midi_player, Uint8 *stream, int len)
 int main(int argc, char **argv)
 {
     static SDL_AudioSpec spec;
-    FluidMidiSeq m(44100);
+    FILE *test;
 
-    if(argc<=1)
+    if(argc<=2)
     {
-        printf("%s filename.mid\n", argv[0]);
+        printf("%s filename.mid soundfont.sf2\n", argv[0]);
         return 0;
     }
 
+    test = fopen(argv[2], "rb");
+    if(!test)
+    {
+        printf("SoundFont file open error!\n");
+        return 1;
+    }
+    fclose(test);
+
+
+    FluidMidiSeq m(argv[2], 44100);
+
     if(!m.Open(argv[1]))
     {
-        printf("File open error!\n");
+        printf("MIDI file open error!\n");
         return 1;
     }
 

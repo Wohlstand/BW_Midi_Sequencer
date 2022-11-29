@@ -18,10 +18,10 @@ class FluidMidiSeq
     MidiSequencer *m_sequencer;
     BW_MidiRtInterface *m_sequencerInterface;
     void initSequencerInterface();
-    void initFluid();
+    void initFluid(const char *bankPath);
     void closeFluid();
 public:
-    explicit FluidMidiSeq(uint32_t rate = 44100);
+    explicit FluidMidiSeq(const char *bankPath, uint32_t rate = 44100);
     ~FluidMidiSeq();
     tsf *getSynth();
     void setLoop(bool enable);
