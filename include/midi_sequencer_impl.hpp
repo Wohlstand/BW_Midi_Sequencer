@@ -2250,12 +2250,12 @@ static bool detectRSXX(const char *head, FileAndMemReader &fr)
     bool ret = false;
 
     // Try to identify RSXX format
-    if (head[0] >= 0x5D && fr.fileSize() > head[0])
+    if(head[0] >= 0x5D && fr.fileSize() > head[0])
     {
         fr.seek(head[0] - 0x10, FileAndMemReader::SET);
         fr.read(headerBuf, 1, 6);
         if(std::memcmp(headerBuf, "rsxx}u", 6) == 0)
-                ret = true;
+            ret = true;
     }
 
     fr.seek(0, FileAndMemReader::SET);
@@ -2497,7 +2497,7 @@ bool BW_MidiSequencer::parseRSXX(FileAndMemReader &fr)
 
     // Try to identify RSXX format
     char start = headerBuf[0];
-    if (start < 0x5D)
+    if(start < 0x5D)
     {
         m_errorString = "RSXX song too short!\n";
         return false;
