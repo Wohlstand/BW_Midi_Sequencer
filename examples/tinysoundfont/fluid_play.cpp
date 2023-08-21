@@ -1,12 +1,18 @@
 #define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
 #include "fluid_seq.h"
+#include <signal.h>
 
 enum { nch = 2 };
 enum { buffer_size = 4096 };
 
 /* variable declarations */
 static Uint32 is_playing = 0; /* remaining length of the sample we have to play */
+
+static void sig_playing(int)
+{
+    is_playing = 0;
+}
 
 /*
  audio callback function
@@ -56,6 +62,9 @@ int main(int argc, char **argv)
     if(SDL_Init(SDL_INIT_AUDIO) < 0)
         return 1;
 
+    signal(SIGINT, &sig_playing);
+    signal(SIGTERM, &sig_playing);
+
     memset(&spec, 0, sizeof(SDL_AudioSpec));
     spec.freq = 44100;
     spec.format = AUDIO_S16SYS;
@@ -88,6 +97,9 @@ int main(int argc, char **argv)
 
     /* shut everything down */
     SDL_CloseAudio();
+
+    printf("\n");
+    fflush(stdout);
 
     return 0;
 }

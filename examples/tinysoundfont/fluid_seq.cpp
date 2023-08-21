@@ -1,3 +1,4 @@
+#include <stdio.h>
 // クラスの名前を変更してABIの衝突を回避する
 #define BW_MidiSequencer FluidMidiSequencer
 // MIDIシーケンサークラスの実装を含める
@@ -133,6 +134,18 @@ void FluidMidiSeq::initFluid(const char *bankPath)
         tsf_channel_set_bank(synth, ch, 0);
     tsf_channel_set_bank_preset(synth, 9, 128, 0);
     tsf_set_output(synth, TSF_STEREO_INTERLEAVED, static_cast<int>(m_rate), -2.0f);
+
+    for(int i = 0; i < synth->presetNum; ++i)
+    {
+        struct tsf_preset &p = synth->presets[i];
+        printf("Preset %d [%d:%d]: %s\n", i, p.bank, p.preset, p.presetName);
+
+        for(int j = 0; j < p.regionNum; ++j)
+        {
+            struct tsf_region &r = p.regions[j];
+            printf("-- region %d: [%d...%d]\n", j, r.lokey, r.hikey);
+        }
+    }
 }
 
 void FluidMidiSeq::closeFluid()
