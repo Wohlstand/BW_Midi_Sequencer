@@ -2271,6 +2271,7 @@ public:
     }
 };
 
+#ifdef BWMIDI_ENABLE_OPL_MUSIC_SUPPORT
 /**
  * @brief Detect the EA-MUS file format
  * @param head Header part
@@ -2329,6 +2330,8 @@ static bool detectIMF(const char *head, FileAndMemReader &fr)
 
     return (sum1 > sum2);
 }
+
+#endif
 
 bool BW_MidiSequencer::loadMIDI(FileAndMemReader &fr)
 {
@@ -2402,6 +2405,7 @@ bool BW_MidiSequencer::loadMIDI(FileAndMemReader &fr)
     }
 #endif
 
+#ifdef BWMIDI_ENABLE_OPL_MUSIC_SUPPORT
     if(std::memcmp(headerBuf, "CTMF", 4) == 0)
     {
         fr.seek(0, FileAndMemReader::SET);
@@ -2419,12 +2423,14 @@ bool BW_MidiSequencer::loadMIDI(FileAndMemReader &fr)
         fr.seek(0, FileAndMemReader::SET);
         return parseRSXX(fr);
     }
+#endif
 
     m_errorString = "Unknown or unsupported file format";
     return false;
 }
 
 
+#ifdef BWMIDI_ENABLE_OPL_MUSIC_SUPPORT
 bool BW_MidiSequencer::parseIMF(FileAndMemReader &fr)
 {
     const size_t    deltaTicks = 1;
@@ -2719,6 +2725,7 @@ bool BW_MidiSequencer::parseCMF(FileAndMemReader &fr)
 
     return true;
 }
+#endif // BWMIDI_ENABLE_OPL_MUSIC_SUPPORT
 
 bool BW_MidiSequencer::parseGMF(FileAndMemReader &fr)
 {
