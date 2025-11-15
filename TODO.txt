@@ -1,0 +1,13 @@
+HMI support:
++ Local tracks loop
++ Branches ID and branch jumps
++ Track disabling per device
+- Branch and loop end callbacks (will be possible to cancel loops or branch jumps!)
+- Complete restore MIDI state on loop jump ()
+
+XMI support:
+- Implement support of multiple songs playing (put song specific stuff into dedicated structure, and have an array of loaded and currently-playing songs!)
+
+EMIDI support:
+- Implement the mode switching between generic and EMIDI behaviour (EMIDI specification conflicts with existing features set and heuristics would just ruin everything).
+- Handle all EMIDI controllers according to EMIDI specification when EMIDI mode is toggled on, and generic behaviour should be ignored.
