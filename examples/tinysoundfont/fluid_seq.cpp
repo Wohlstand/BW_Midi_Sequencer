@@ -123,6 +123,7 @@ void FluidMidiSeq::initSequencerInterface()
     seq->rt_currentDevice = rtCurrentDevice;
 
     m_sequencer->setInterface(seq);
+    m_sequencer->setDeviceMask(BW_MidiSequencer::Device_GeneralMidi|BW_MidiSequencer::Device_SoundMasterII|BW_MidiSequencer::Device_GravisUltrasound);
 }
 
 void FluidMidiSeq::initFluid(const char *bankPath)

@@ -1,3 +1,4 @@
+#include <signal.h>
 #define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
 #include "fluid_seq.h"
@@ -7,6 +8,11 @@ enum { buffer_size = 4096 };
 
 /* variable declarations */
 static Uint32 is_playing = 0; /* remaining length of the sample we have to play */
+
+static void sig_playing(int)
+{
+    is_playing = 0;
+}
 
 /*
  audio callback function
@@ -25,13 +31,14 @@ void my_audio_callback(void *midi_player, Uint8 *stream, int len)
 int main(int argc, char **argv)
 {
     static SDL_AudioSpec spec;
-    FluidMidiSeq m(44100);
 
     if(argc<=1)
     {
-        printf("%s filename.mid\n", argv[0]);
+        printf("%s filename.mid [bank.sf2]\n", argv[0]);
         return 0;
     }
+
+    FluidMidiSeq m(argc >= 3 ? argv[2] : NULL, 44100);
 
     if(!m.Open(argv[1]))
     {
@@ -44,6 +51,9 @@ int main(int argc, char **argv)
     /* Initialize SDL.*/
     if(SDL_Init(SDL_INIT_AUDIO) < 0)
         return 1;
+
+    signal(SIGINT, &sig_playing);
+    signal(SIGTERM, &sig_playing);
 
     memset(&spec, 0, sizeof(SDL_AudioSpec));
     spec.freq = 44100;

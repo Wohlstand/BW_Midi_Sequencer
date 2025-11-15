@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 2.8.12...4.0)
 
 project(TinySoundFontPlay)
 
@@ -10,4 +10,3 @@ target_include_directories(tsplay PRIVATE
     ${TinySoundFontPlay_SOURCE_DIR}/../../include
 )
 target_link_libraries(tsplay SDL2)
-

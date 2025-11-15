@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 2.8.12...4.0)
 
 project(FluidPlay)
 
@@ -15,4 +15,3 @@ target_include_directories(fplay PRIVATE
     ${FluidPlay_SOURCE_DIR}/../../include
 )
 target_link_libraries(fplay PRIVATE fluidsynth SDL2 ${FluidSynth_LIBRARIES})
-

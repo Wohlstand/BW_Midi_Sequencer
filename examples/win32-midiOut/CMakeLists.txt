@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 2.8.12...4.0)
 
 project(w32MidiPlay)
 
@@ -15,4 +15,3 @@ target_link_libraries(w32playmidi PRIVATE -lwinmm)
 if(NOT MSVC)
     target_link_libraries(w32playmidi PRIVATE -lstdc++)
 endif()
-

@@ -14,6 +14,7 @@ class FluidMidiSeq
     fluid_settings_t *settings;
     fluid_synth_t    *synth;
     int               soundfont;
+    const char *soundFontPatch;
 
     uint32_t m_rate;
 
@@ -22,8 +23,9 @@ class FluidMidiSeq
     void initSequencerInterface();
     void initFluid();
     void closeFluid();
+
 public:
-    explicit FluidMidiSeq(uint32_t rate = 44100);
+    explicit FluidMidiSeq(const char *bankPath, uint32_t rate = 44100);
     ~FluidMidiSeq();
     fluid_synth_t *getSynth();
     void setLoop(bool enable);

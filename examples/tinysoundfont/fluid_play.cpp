@@ -1,7 +1,7 @@
+#include <signal.h>
 #define SDL_MAIN_HANDLED
 #include <SDL2/SDL.h>
 #include "fluid_seq.h"
-#include <signal.h>
 
 enum { nch = 2 };
 enum { buffer_size = 4096 };

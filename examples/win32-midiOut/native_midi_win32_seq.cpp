@@ -177,6 +177,7 @@ void *mixer_seq_init_interface()
     /* NonStandard calls End */
 
     seqi->seq.setInterface(seqi->seq_if);
+    seqi->seq.setDeviceMask(BW_MidiSequencer::Device_GeneralMidi|BW_MidiSequencer::Device_SoundMasterII|BW_MidiSequencer::Device_GravisUltrasound);
 
     return seqi;
 }

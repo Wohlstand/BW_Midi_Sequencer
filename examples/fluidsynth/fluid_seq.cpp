@@ -123,6 +123,7 @@ void FluidMidiSeq::initSequencerInterface()
     seq->rt_currentDevice = rtCurrentDevice;
 
     m_sequencer->setInterface(seq);
+    m_sequencer->setDeviceMask(BW_MidiSequencer::Device_GeneralMidi|BW_MidiSequencer::Device_SoundMasterII|BW_MidiSequencer::Device_GravisUltrasound);
 }
 
 void FluidMidiSeq::initFluid()
@@ -130,7 +131,7 @@ void FluidMidiSeq::initFluid()
     closeFluid();
     settings = new_fluid_settings();
     synth = new_fluid_synth(settings);
-    soundfont = fluid_synth_sfload(synth, "/usr/share/sounds/sf2/FluidR3_GM.sf2", 1);
+    soundfont = fluid_synth_sfload(synth, soundFontPatch, 1);
 }
 
 void FluidMidiSeq::closeFluid()
@@ -145,8 +146,9 @@ void FluidMidiSeq::closeFluid()
     }
 }
 
-FluidMidiSeq::FluidMidiSeq(uint32_t rate)
+FluidMidiSeq::FluidMidiSeq(const char *bankPath, uint32_t rate)
 {
+    soundFontPatch = bankPath ? bankPath : "/usr/share/sounds/sf2/FluidR3_GM.sf2";
     settings = nullptr;
     synth = nullptr;
     soundfont = -1;
