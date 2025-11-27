@@ -875,7 +875,8 @@ bool BW_MidiSequencer::hmi_parseEvent(const HMIData &hmi_data, const HMITrackDir
 bool BW_MidiSequencer::parseHMI(FileAndMemReader &fr)
 {
     char readBuf[20];
-    size_t fsize, file_size, totalGotten, abs_position;
+    size_t fsize, file_size, totalGotten;
+    uint64_t abs_position;
     HMIData hmi_data;
     bool ok = false;
     int status = 0;
@@ -1229,6 +1230,7 @@ bool BW_MidiSequencer::parseHMI(FileAndMemReader &fr)
     buildSmfSetupReset(hmi_data.tracksCount);
 
     m_loopFormat = Loop_HMI;
+    m_stateRestoreSetup = TRACK_RESTORE_DEFAULT_HMI;
 
     std::memset(&event, 0, sizeof(event));
     event.isValid = 1;
@@ -1274,6 +1276,7 @@ bool BW_MidiSequencer::parseHMI(FileAndMemReader &fr)
     {
         const HMITrackDir &d = dir[tk];
         MidiTrackState &trackState = m_trackState[tk_v];
+        bool trackChannelHas = false;
 
         if(d.len == 0)
             continue; // This track is broken
@@ -1362,7 +1365,16 @@ bool BW_MidiSequencer::parseHMI(FileAndMemReader &fr)
                 return false; // Error value already written
 
             if(event.isValid)
+            {
                 addEventToBank(evtPos, event);
+
+                if(!trackChannelHas && event.type > 0x00 && event.type < 0xF0)
+                {
+                    trackState.state.track_channel = event.channel;
+                    if(event.channel != 0) // If it's always zero channel, sounds like something wrong
+                        trackChannelHas = true;
+                }
+            }
 
             if(event.type != MidiEvent::T_SPECIAL || event.subtype != MidiEvent::ST_ENDTRACK)
             {
@@ -1373,7 +1385,7 @@ bool BW_MidiSequencer::parseHMI(FileAndMemReader &fr)
                         TempoEvent t = {readBEint(event.data_loc, event.data_loc_size), abs_position};
                         temposList.push_back(t);
                     }
-                    else
+                    else if(event.subtype != MidiEvent::ST_ENDTRACK)
                         analyseLoopEvent(loopState, event, abs_position, &trackState.loop);
                 }
 
@@ -1409,22 +1421,12 @@ bool BW_MidiSequencer::parseHMI(FileAndMemReader &fr)
                         tempo_get(&t));
                 fflush(stdout);
 #endif
-
-                evtPos.absPos = abs_position;
-                abs_position += evtPos.delay;
-                m_trackData[tk_v].push_back(evtPos);
-                evtPos.clear();
-                loopState.gotLoopEventsInThisRow = 0;
+                smf_flushRow(evtPos, abs_position, tk_v, loopState);
             }
 
             if(status < 0 && evtPos.events_begin != evtPos.events_end) // Last row in the track
-            {
-                evtPos.delay = 0;
-                evtPos.absPos = abs_position;
-                m_trackData[tk_v].push_back(evtPos);
-                evtPos.clear();
-                loopState.gotLoopEventsInThisRow = 0;
-            }
+                smf_flushRow(evtPos, abs_position, tk_v, loopState, true);
+
         } while((fr.tell() <= d.end) && (event.subtype != MidiEvent::ST_ENDTRACK));
 
 #ifdef BWMIDI_DEBUG_HMI_PARSE
