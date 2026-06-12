@@ -1,4 +1,4 @@
-# A header-only MIDI sequencer for C++
+# BW MIDI Sequencer - A header-only MIDI sequencer for C++
 
 ## Features
 * Support for streaming of MIDI, MUS, HMI, HMP, XMI (via built-in XMI2MID).
@@ -13,12 +13,13 @@
 * Ability to load a file via file path or via memory.
   * NOTE: Acceptable file paths should be in UTF-8 even on Windows.
 * Compatibility with C++98 standard which can work on a bunch of older C++ compilers.
+* Support for EMIDI based MIDI files (You should manually enable this option via `setModeEMIDI()` method to toggle between default and EMIDI modes).
+* Support for DPMI memory locking when built for DOS using DJGPP compiler.
 
 ## License
 * The code of sequencer is under MIT license
-* The code of "fraction.hpp" is in a public domain
-* XMI2MIDI is taken from WildMIDI project and there are licensed under LGPLv2:
-  * If you want to use this MIDI sequencer with a MIT license, you should disable XMI suppory by removing of "impl/cvt_xmi2mus.hpp" file and declaring of next macros:
+* XMI2MIDI (`include/impl/cvt_xmi2mid.hpp`) is taken from WildMIDI project and there are licensed under LGPLv2:
+  * If you want to use this MIDI sequencer with a MIT license, you should disable XMI suppory by removing of `"impl/cvt_xmi2mus.hpp"` file and declaring of next macros:
     * "-DBWMIDI_DISABLE_XMI_SUPPORT"
 
 ## Usage tips
